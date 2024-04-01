@@ -30,4 +30,3 @@ for i in range(10):
         with open('VCF/' + df['UNIQUEID'][i] + '.vcf', 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
     os.remove(df['UNIQUEID'][i] + '.vcf.gz')
-    
