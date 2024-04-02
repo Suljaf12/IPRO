@@ -1,0 +1,22 @@
+# Compiled python files
+*.pyc
+
+# Files created by PyCharm
+.idea/
+
+# Virtual environment
+venv/
+env/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+#Extra
+VCF/
+*.vcf
