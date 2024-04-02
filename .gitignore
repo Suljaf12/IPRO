@@ -22,3 +22,4 @@ misc.xml
 VCF/
 *.vcf
 *.vcf.gz
+.idea/misc.xml
