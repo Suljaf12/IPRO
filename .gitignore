@@ -18,5 +18,7 @@ env/
 Thumbs.db
 
 #Extra
+misc.xml
 VCF/
 *.vcf
+*.vcf.gz
