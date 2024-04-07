@@ -23,7 +23,12 @@ for i in range(10):
     
 #unzip
 #move the files to a new directory
-os.mkdir('VCF')
+vcf_directory = 'VCF'
+if os.path.exists(vcf_directory):
+    shutil.rmtree(vcf_directory)
+    os.mkdir(vcf_directory)
+else:
+    os.mkdir(vcf_directory)
 
 for i in range(10):
     with gzip.open(df['UNIQUEID'][i] + '.vcf.gz', 'rb') as f_in:
