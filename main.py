@@ -1,85 +1,45 @@
-from Bio import SeqIO
-import numpy as np
-import csv
+from CNNModel import *
 
-def generate_normalized_kmer_frequencies(sequence, k_range):
-    kmer_counts = {}
-    total_kmers = 0
-    
-    # Generate and count k-mers
-    for k in k_range:
-        for i in range(len(sequence) - k + 1):
-            kmer = sequence[i:i+k]
-            kmer_counts[kmer] = kmer_counts.get(kmer, 0) + 1
-            total_kmers += 1
-    
-    # Normalize k-mer frequencies
-    for kmer in kmer_counts:
-        kmer_counts[kmer] /= total_kmers
-    
-    return kmer_counts
+if __name__ == "__main__":
+    fasta_files = [
+        "fasta/site.02.subj.0001.lab.2014222001.iso.1.fasta",
+        "fasta/site.02.subj.0002.lab.2014222005.iso.1.fasta",
+        "fasta/site.02.subj.0004.lab.2014222010.iso.1.fasta",
+        "fasta/site.02.subj.0005.lab.2014222011.iso.1.fasta",
+        "fasta/site.02.subj.0006.lab.2014222013.iso.1.fasta",
+        "fasta/site.02.subj.0007.lab.2014222016.iso.1.fasta",
+        "fasta/site.02.subj.0008.lab.2014222017.iso.1.fasta",
+        "fasta/site.02.subj.0009.lab.2014222037.iso.1.fasta",
+        "fasta/site.02.subj.0010.lab.2014222040.iso.1.fasta",
+        "fasta/site.02.subj.0011.lab.2014222046.iso.1.fasta"
+    ]
 
-def build_global_kmer_index(sequences, k_range):
-    global_kmer_index = {}
-    for sequence in sequences:
-        for k in k_range:
-            for i in range(len(sequence) - k + 1):
-                kmer = sequence[i:i+k]
-                if kmer not in global_kmer_index:
-                    global_kmer_index[kmer] = len(global_kmer_index)
-    return global_kmer_index
+    # Load the data
+    X, y = load_data(fasta_files)
 
-def vectorize_sequence(sequence, global_kmer_index, k_range):
-    vector = np.zeros(len(global_kmer_index))
-    kmer_frequencies = generate_normalized_kmer_frequencies(sequence, k_range)
-    
-    for kmer, frequency in kmer_frequencies.items():
-        if kmer in global_kmer_index:
-            vector[global_kmer_index[kmer]] = frequency
-            
-    return vector
+    # Split the data
+    X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
 
-def process_fasta_files(fasta_files):
-    sequences = []
-    for fasta_file in fasta_files:
-        sequences.extend([str(record.seq).upper() for record in SeqIO.parse(fasta_file, "fasta")])
-    return sequences
+    # Print the shapes of the resulting sets
+    print("Training set:", X_train.shape, y_train.shape)
+    print("Validation set:", X_val.shape, y_val.shape)
+    print("Test set:", X_test.shape, y_test.shape)
 
-def main(fasta_files):
-    k_range = range(1, 7)  # K-mers from 1 to 6
-    sequences = process_fasta_files(fasta_files)
-    global_kmer_index = build_global_kmer_index(sequences, k_range)
-    
-    # Vectorize sequences
-    vectors = np.array([vectorize_sequence(seq, global_kmer_index, k_range) for seq in sequences])
-    
-    # Reshape for CNN input
-    vectors = vectors.reshape(vectors.shape[0], vectors.shape[1], 1)
-    
-    return vectors
+    # Build the CNN model
+    #input_shape = X_train.shape[1:]
+    #model = build_cnn_model(input_shape)
 
-fasta_files = [
-    "fasta/site.02.subj.0001.lab.2014222001.iso.1.fasta",
-    "fasta/site.02.subj.0002.lab.2014222005.iso.1.fasta",
-    "fasta/site.02.subj.0004.lab.2014222010.iso.1.fasta",
-    "fasta/site.02.subj.0005.lab.2014222011.iso.1.fasta",
-    "fasta/site.02.subj.0006.lab.2014222013.iso.1.fasta",
-    "fasta/site.02.subj.0007.lab.2014222016.iso.1.fasta",
-    "fasta/site.02.subj.0008.lab.2014222017.iso.1.fasta",
-    "fasta/site.02.subj.0009.lab.2014222037.iso.1.fasta",
-    "fasta/site.02.subj.0010.lab.2014222040.iso.1.fasta",
-    "fasta/site.02.subj.0011.lab.2014222046.iso.1.fasta"
-]
+    # Compile the model
+    #compile_model(model)
+
+    # Train the model
+    #history = train_model(model, X_train, y_train, X_val, y_val)
+
+    # Evaluate the model
+    #test_loss, test_accuracy = model.evaluate(X_test, y_test)
+    #print("Test Loss:", test_loss)
+    #print("Test Accuracy:", test_accuracy)
 
 
-# Use the main function with your FASTA file
-sequence_vectors = main(fasta_files)
-
-print(sequence_vectors.shape)
-
-# Save to CSV
-with open('output.csv', 'w', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerows(sequence_vectors.reshape(sequence_vectors.shape[0], -1))  # Reshape back for CSV writing
 
 
