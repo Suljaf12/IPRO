@@ -2,6 +2,10 @@ import csv
 import numpy as np
 from Bio import SeqIO
 from sklearn.model_selection import train_test_split
+#from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv1D, MaxPooling1D, Flatten, Dense
+from tensorflow.python.keras.models import Sequential
+
 
 ####################################################################
 ############### Old/Modified Functions from main.py#################
@@ -181,4 +185,55 @@ def split_data(X, y, test_size=0.2, val_size=0.2, random_state=42):
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
+def build_cnn_model(input_shape):
+    """
+    Build a Convolutional Neural Network (CNN) model.
+
+    Parameters:
+        input_shape (tuple): Shape of the input data (e.g., (sequence_length, 1)).
+
+    Returns:
+        tensorflow.keras.models.Sequential: Compiled CNN model.
+    """
+    model = Sequential([
+        Conv1D(filters=32, kernel_size=3, activation='relu', input_shape=input_shape),
+        MaxPooling1D(pool_size=2),
+        Conv1D(filters=64, kernel_size=3, activation='relu'),
+        MaxPooling1D(pool_size=2),
+        Flatten(),
+        Dense(units=64, activation='relu'),
+        Dense(units=1, activation='sigmoid')
+    ])
+    return model
+
+def compile_model(model):
+    """
+    Compile the specified CNN model.
+
+    Parameters:
+        model (tensorflow.keras.models.Sequential): CNN model to compile.
+
+    Returns:
+        None
+    """
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+def train_model(model, X_train, y_train, X_val, y_val, epochs=10, batch_size=32):
+    """
+    Train the specified CNN model.
+
+    Parameters:
+        model (tensorflow.keras.models.Sequential): CNN model to train.
+        X_train (numpy.ndarray): Training data features.
+        y_train (numpy.ndarray): Training data labels.
+        X_val (numpy.ndarray): Validation data features.
+        y_val (numpy.ndarray): Validation data labels.
+        epochs (int): Number of epochs for training (default is 10).
+        batch_size (int): Batch size for training (default is 32).
+
+    Returns:
+        tensorflow.python.keras.callbacks.History: Training history.
+    """
+    history = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(X_val, y_val))
+    return history
 
