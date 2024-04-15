@@ -17,6 +17,8 @@ if __name__ == "__main__":
     # Load the data
     X, y = load_data(fasta_files)
 
+    #print(X)
+
     # Split the data
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(X, y)
 
@@ -26,20 +28,20 @@ if __name__ == "__main__":
     print("Test set:", X_test.shape, y_test.shape)
 
     # Build the CNN model
-    #input_shape = X_train.shape[1:]
-    #model = build_cnn_model(input_shape)
+    input_shape = X_train.shape[1:]
+    model = build_cnn_model(input_shape)
 
     # Compile the model
-    #compile_model(model)
+    compile_model(model)
 
     # Train the model
-    #history = train_model(model, X_train, y_train, X_val, y_val)
+    history = train_model(model, X_train, y_train, X_val, y_val)
 
     # Evaluate the model
-    #test_loss, test_accuracy = model.evaluate(X_test, y_test)
-    #print("Test Loss:", test_loss)
-    #print("Test Accuracy:", test_accuracy)
+    test_loss, test_accuracy = model.evaluate(X_test, y_test)
+    print("Test Loss:", test_loss)
+    print("Test Accuracy:", test_accuracy)
 
-
+    model.summary()
 
 

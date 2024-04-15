@@ -3,8 +3,11 @@ import numpy as np
 from Bio import SeqIO
 from sklearn.model_selection import train_test_split
 #from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv1D, MaxPooling1D, Flatten, Dense
-from tensorflow.python.keras.models import Sequential
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv1D, MaxPooling1D, Flatten, Dense, Input, Dropout
+from tensorflow.keras import regularizers
+from tensorflow.keras.optimizers import Adam
+
 
 
 ####################################################################
@@ -156,6 +159,8 @@ def load_data(fasta_files):
     # Process the FASTA files to obtain sequence vectors
     sequence_vectors = prepare_sequence_data_for_cnn(fasta_files)
 
+
+
     # Save vectors to csv
     output_file = 'output.csv'
     save_vectors_to_csv(sequence_vectors, output_file)
@@ -190,25 +195,28 @@ def build_cnn_model(input_shape):
     Build a Convolutional Neural Network (CNN) model.
 
     Parameters:
-        input_shape (tuple): Shape of the input data (e.g., (sequence_length, 1)).
+        input_shape (tuple): Shape of the input data (e.g., (num_features, num_kmers, 1)).
 
     Returns:
-        tensorflow.keras.models.Sequential: Compiled CNN model.
+        tensorflow.keras.models.Sequential: CNN model.
     """
     model = Sequential([
-        Conv1D(filters=32, kernel_size=3, activation='relu', input_shape=input_shape),
+        Input(shape=input_shape),
+        Conv1D(filters=32, kernel_size=3, activation='relu', kernel_regularizer=regularizers.l2(0.01)),
         MaxPooling1D(pool_size=2),
-        Conv1D(filters=64, kernel_size=3, activation='relu'),
+        Conv1D(filters=64, kernel_size=3, activation='relu', kernel_regularizer=regularizers.l2(0.01)),
         MaxPooling1D(pool_size=2),
         Flatten(),
-        Dense(units=64, activation='relu'),
-        Dense(units=1, activation='sigmoid')
+        Dense(64, activation='relu'),
+        Dropout(0.5),
+        Dense(1, activation='sigmoid')  # Binary classification, so sigmoid activation
     ])
     return model
 
+
 def compile_model(model):
     """
-    Compile the specified CNN model.
+    Compile the CNN model.
 
     Parameters:
         model (tensorflow.keras.models.Sequential): CNN model to compile.
@@ -216,23 +224,24 @@ def compile_model(model):
     Returns:
         None
     """
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    optimizer = Adam(learning_rate=0.001)
+    model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
 def train_model(model, X_train, y_train, X_val, y_val, epochs=10, batch_size=32):
     """
-    Train the specified CNN model.
+    Train the CNN model.
 
     Parameters:
         model (tensorflow.keras.models.Sequential): CNN model to train.
-        X_train (numpy.ndarray): Training data features.
-        y_train (numpy.ndarray): Training data labels.
-        X_val (numpy.ndarray): Validation data features.
-        y_val (numpy.ndarray): Validation data labels.
+        X_train (numpy.ndarray): Array of input features for training.
+        y_train (numpy.ndarray): Array of target labels for training.
+        X_val (numpy.ndarray): Array of input features for validation.
+        y_val (numpy.ndarray): Array of target labels for validation.
         epochs (int): Number of epochs for training (default is 10).
         batch_size (int): Batch size for training (default is 32).
 
     Returns:
-        tensorflow.python.keras.callbacks.History: Training history.
+        tensorflow.keras.callbacks.History: Training history.
     """
     history = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(X_val, y_val))
     return history
